@@ -68,49 +68,58 @@ function Login() {
     e.preventDefault();
 
     if (!email || !password) {
-      alert("Please enter both email and password.");
-      return;
+        alert("Please enter both email and password.");
+        return;
     }
 
     try {
-      const response = await logIn({ email, password });
+        const response = await logIn({ email, password });
 
-      console.log("Login Response:", response); // Log the full response for debugging
+        console.log("Login Response:", response); // Log the full response for debugging
 
-      if (response.data && response.data.access_token) {
-        alert(response.data.message || "Login successful!");
+        if (response.data && response.data.access_token) {
+            alert(response.data.message || "Login successful!");
 
-        // Store necessary data in localStorage
-        localStorage.setItem("email", email);
-        localStorage.setItem("token", response.data.access_token);
-        localStorage.setItem("role", response.data.role || "user");
-        localStorage.setItem("member_id", response.data.member_id); // Always set this
-        if (response.data.trainer_id) {
-          localStorage.setItem("trainer_id", response.data.trainer_id);
+            // Store necessary data in localStorage
+            localStorage.setItem("email", email);
+            localStorage.setItem("token", response.data.access_token);
+            localStorage.setItem("role", response.data.role || "user");
+
+            // Ensure member_id is always set
+            if (response.data.member_id) {
+                localStorage.setItem("member_id", response.data.member_id);
+            } else {
+                localStorage.removeItem("member_id"); // Clear if not a member
+            }
+
+            // Set trainer_id if available
+            if (response.data.trainer_id) {
+                localStorage.setItem("trainer_id", response.data.trainer_id);
+            } else {
+                localStorage.removeItem("trainer_id"); // Clear if not a trainer
+            }
+
+            // Set admin_id if available
+            if (response.data.admin_id) {
+                localStorage.setItem("admin_id", response.data.admin_id);
+            } else {
+                localStorage.removeItem("admin_id"); // Clear if not an admin
+            }
+
+            // Navigate to the dashboard
+            navigate("/dashboard");
         } else {
-          localStorage.removeItem("trainer_id"); // Clear if not a trainer
+            alert("Unexpected response structure.");
         }
-        if (response.data.admin_id) {
-          localStorage.setItem("admin_id", response.data.admin_id);
-        } else {
-          localStorage.removeItem("admin_id"); // Clear if not an admin
-        }
-
-        // Navigate to the dashboard
-        navigate("/dashboard");
-      } else {
-        alert("Unexpected response structure.");
-      }
     } catch (err) {
-      console.error("Login Error:", err); // Log the error for debugging
-      if (err.response && err.response.data) {
-        alert(err.response.data.message || "Invalid credentials. Please try again.");
-      } else {
-        alert("An error occurred. Please try again later.");
-      }
+        console.error("Login Error:", err); // Log the error for debugging
+        if (err.response && err.response.data) {
+            alert(err.response.data.message || "Invalid credentials. Please try again.");
+        } else {
+            alert("An error occurred. Please try again later.");
+        }
     }
-  };
-
+};
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4">
       <Card className="w-full max-w-md">
