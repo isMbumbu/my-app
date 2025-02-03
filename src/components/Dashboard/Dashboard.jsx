@@ -9,6 +9,7 @@ const Dashboard = () => {
     const [editMode, setEditMode] = useState(false);
     const [email, setEmail] = useState('');
     const [role, setRole] = useState('');
+    const [id, setId] = useState('');
     const [workoutPlans, setWorkoutPlans] = useState([]);
     const [classes, setClasses] = useState([]);
     const [members, setMembers] = useState([]);
@@ -25,27 +26,36 @@ const Dashboard = () => {
             const storedEmail = localStorage.getItem('email');
             const storedRole = localStorage.getItem('role');
     
+            // Get the ID based on role
+            const storedId = storedRole === 'member' 
+                ? localStorage.getItem('member_id') 
+                : storedRole === 'trainer' 
+                ? localStorage.getItem('trainer_id') 
+                : storedRole === 'admin' 
+                ? localStorage.getItem('admin_id') 
+                : null;
+    
             if (!storedEmail || !storedRole) {
                 alert('You are not logged in or role information is missing. Redirecting to login.');
                 navigate('/login');
                 return;
             }
     
+            // If ID is missing, set a fallback value
             setEmail(storedEmail);
             setRole(storedRole);
+            setId(storedId || 'N/A'); // Fallback for missing ID
         };
     
         fetchUserInfo();
     }, [navigate]);
     
     useEffect(() => {
-        if (email && role) {
-            const token = localStorage.getItem('token');
-
+        if (email && role && id) {
             if (role === 'Trainer') {
                 // Fetch booked classes for the trainer
-                axios.get('https://simple-gymbuddy.onrender.com/bookings', {
-                    headers: { Authorization: `Bearer ${token}` },
+                axios.get(`https://simple-gymbuddy.onrender.com/bookings?trainer_id=${id}`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 })
                 .then(response => {
                     setBookedClasses(response.data.bookings || []);
@@ -56,8 +66,8 @@ const Dashboard = () => {
                 });
 
                 // Fetch workout plans
-                axios.get('https://simple-gymbuddy.onrender.com/workout-plans', {
-                    headers: { Authorization: `Bearer ${token}` },
+                axios.get(`https://simple-gymbuddy.onrender.com/workout-plans`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 })
                 .then(response => {
                     setWorkoutPlans(response.data.workout_plans || []);
@@ -67,8 +77,8 @@ const Dashboard = () => {
                 });
 
                 // Fetch classes
-                axios.get('https://simple-gymbuddy.onrender.com/class', {
-                    headers: { Authorization: `Bearer ${token}` },
+                axios.get(`https://simple-gymbuddy.onrender.com/class`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 })
                 .then(response => {
                     setClasses(response.data.classes || []);
@@ -78,8 +88,8 @@ const Dashboard = () => {
                 });
 
                 // Fetch members
-                axios.get('https://simple-gymbuddy.onrender.com/members', {
-                    headers: { Authorization: `Bearer ${token}` },
+                axios.get(`https://simple-gymbuddy.onrender.com/members`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 })
                 .then(response => {
                     setMembers(response.data || []);
@@ -89,8 +99,8 @@ const Dashboard = () => {
                 });
             } else if (role === 'Member') {
                 // Fetch booked classes for the member
-                axios.get('https://simple-gymbuddy.onrender.com/bookings', {
-                    headers: { Authorization: `Bearer ${token}` },
+                axios.get(`https://simple-gymbuddy.onrender.com/bookings?member_id=${id}`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
                 })
                 .then(response => {
                     setBookedClasses(response.data.bookings || []);
@@ -101,12 +111,13 @@ const Dashboard = () => {
                 });
             }
         }
-    }, [email, role]);
+    }, [email, role, id]);
 
     const handleLogout = () => {
         localStorage.removeItem('email');
         localStorage.removeItem('token');
         localStorage.removeItem('role');
+        localStorage.removeItem('id');
         alert('Logged out successfully.');
         navigate('/login');
     };
@@ -251,82 +262,120 @@ const Dashboard = () => {
                                     <li key={booking.id} className="mb-4 p-4 border border-gray-200 rounded">
                                         <p><strong>Class:</strong> {booking.class_.name} - {booking.class_.description}</p>
                                         <p>
-                                            <strong>Date:</strong> {new Date(booking.date).toLocaleDateString()}
+                                            <strong>Time:</strong> {new Date(booking.start_time).toLocaleString()} - {new Date(booking.end_time).toLocaleString()}
                                         </p>
                                     </li>
                                 ))}
                             </ul>
                         ) : (
-                            <p>No booked classes found.</p>
+                            <p>No classes booked yet.</p>
                         )}
                     </div>
 
-                    {/* Other Sections */}
+                    {/* Trainer-Specific Sections */}
                     {role === 'Trainer' && (
-                        <div className="mt-6">
-                            <h2 className="text-xl font-semibold mb-4">Manage Classes</h2>
-                            <form onSubmit={handleCreateClass}>
-                                <input
-                                    type="text"
-                                    value={className}
-                                    onChange={(e) => setClassName(e.target.value)}
-                                    className="p-2 mb-2 border border-gray-300 rounded w-full"
-                                    placeholder="Class Name"
-                                />
-                                <input
-                                    type="text"
-                                    value={classDescription}
-                                    onChange={(e) => setClassDescription(e.target.value)}
-                                    className="p-2 mb-2 border border-gray-300 rounded w-full"
-                                    placeholder="Class Description"
-                                />
+                        <div>
+                            {/* Create Workout Plan Section */}
+                            <div className="mt-6">
+                                <h2 className="text-xl font-semibold mb-2">Create Workout Plan</h2>
+                                <CreateWorkoutPlan />
+                                <h3 className="text-lg font-semibold mt-4">Your Workout Plans</h3>
+                                <ul>
+                                    {workoutPlans.map(plan => (
+                                        <li key={plan.id}>
+                                            <strong>{plan.name}</strong>: {plan.description}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            {/* Create Class Section */}
+                            <div className="mt-6">
+                                <h2 className="text-xl font-semibold mb-2">Create Class</h2>
+                                <form onSubmit={handleCreateClass}>
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium mb-2">Class Name</label>
+                                        <input
+                                            type="text"
+                                            value={className}
+                                            onChange={(e) => setClassName(e.target.value)}
+                                            className="p-2 border border-gray-300 rounded w-full"
+                                            placeholder="Enter class name"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium mb-2">Class Description</label>
+                                        <textarea
+                                            value={classDescription}
+                                            onChange={(e) => setClassDescription(e.target.value)}
+                                            className="p-2 border border-gray-300 rounded w-full"
+                                            placeholder="Enter class description"
+                                            required
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700 transition-all duration-200"
+                                    >
+                                        Create Class
+                                    </button>
+                                </form>
+
+                                <h3 className="text-lg font-semibold mt-4">Your Classes</h3>
+                                <ul>
+                                    {classes.map(cls => (
+                                        <li key={cls.id}>
+                                            <strong>{cls.name}</strong>: {cls.description}
+                                        </li>
+                                    ))}
+                                </ul>
+
+                                {/* Assign Member to Class Section */}
+                                <h3 className="text-lg font-semibold mt-4">Assign Member to Class</h3>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium mb-2">Select Member</label>
+                                    <select
+                                        value={selectedMemberId}
+                                        onChange={(e) => setSelectedMemberId(e.target.value)}
+                                        className="p-2 border border-gray-300 rounded w-full"
+                                    >
+                                        <option value="">Select a Member</option>
+                                        {members.map(member => (
+                                            <option key={member.id} value={member.id}>
+                                                {member.email}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block text-sm font-medium mb-2">Select Class</label>
+                                    <select
+                                        value={selectedClassId}
+                                        onChange={(e) => setSelectedClassId(e.target.value)}
+                                        className="p-2 border border-gray-300 rounded w-full"
+                                    >
+                                        <option value="">Select a class</option>
+                                        {classes.map(cls => (
+                                            <option key={cls.id} value={cls.id}>{cls.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
                                 <button
-                                    type="submit"
-                                    className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700 transition-all duration-200"
+                                    onClick={() => assignMemberToClass(selectedMemberId, selectedClassId)}
+                                    className="py-2 px-4 bg-green-500 text-white rounded hover:bg-green-700 transition-all duration-200"
                                 >
-                                    Create Class
+                                    Assign Member
                                 </button>
-                            </form>
+                            </div>
                         </div>
                     )}
 
-                    {role === 'Trainer' && (
+                    {/* Member List Section for Admin and Trainer */}
+                    {(role === 'Admin' || role === 'Trainer') && (
                         <div className="mt-6">
-                            <h2 className="text-xl font-semibold mb-4">Assign Members to Class</h2>
-                            <div>
-                                <select
-                                    value={selectedMemberId}
-                                    onChange={(e) => setSelectedMemberId(e.target.value)}
-                                    className="p-2 mb-2 border border-gray-300 rounded w-full"
-                                >
-                                    <option value="">Select Member</option>
-                                    {members.map((member) => (
-                                        <option key={member.id} value={member.id}>
-                                            {member.name}
-                                        </option>
-                                    ))}
-                                </select>
-
-                                <select
-                                    value={selectedClassId}
-                                    onChange={(e) => setSelectedClassId(e.target.value)}
-                                    className="p-2 mb-2 border border-gray-300 rounded w-full"
-                                >
-                                    <option value="">Select Class</option>
-                                    {classes.map((classItem) => (
-                                        <option key={classItem.id} value={classItem.id}>
-                                            {classItem.name}
-                                        </option>
-                                    ))}
-                                </select>
-
-                                <button
-                                    onClick={() => assignMemberToClass(selectedMemberId, selectedClassId)}
-                                    className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700 transition-all duration-200"
-                                >
-                                    Assign
-                                </button>
-                            </div>
+                            <h2 className="text-xl font-semibold mb-2">Members</h2>
+                            <MemberList />
                         </div>
                     )}
                 </div>

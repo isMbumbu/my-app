@@ -85,21 +85,21 @@ function Login() {
             localStorage.setItem("token", response.data.access_token);
             localStorage.setItem("role", response.data.role || "user");
 
-            // Ensure member_id is always set
+            // Ensure member_id is always set for members
             if (response.data.member_id) {
                 localStorage.setItem("member_id", response.data.member_id);
             } else {
                 localStorage.removeItem("member_id"); // Clear if not a member
             }
 
-            // Set trainer_id if available
+            // Set trainer_id if available for trainers
             if (response.data.trainer_id) {
                 localStorage.setItem("trainer_id", response.data.trainer_id);
             } else {
                 localStorage.removeItem("trainer_id"); // Clear if not a trainer
             }
 
-            // Set admin_id if available
+            // Set admin_id if available for admins
             if (response.data.admin_id) {
                 localStorage.setItem("admin_id", response.data.admin_id);
             } else {
