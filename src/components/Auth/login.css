@@ -1,0 +1,163 @@
+/* App.css */
+
+/* Background Gradient with Image */
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, rgba(240, 244, 248, 0.9), rgba(230, 233, 240, 0.9)), 
+  url('/sven-mieke-MsCgmHuirDo-unsplash.jpg') no-repeat center center fixed;
+
+  background-size: cover;
+  font-family: 'Inter', sans-serif; /* Modern font */
+  color: #333;
+}
+
+/* Centering Card Container */
+.flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Card Styling */
+.card {
+  width: 100%;
+  max-width: 450px;
+  background: rgba(255, 255, 255, 0.95); /* Slightly transparent white */
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px); /* Blur effect for glassmorphism */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
+  transform: translateY(0);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Card Header */
+.card-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.card-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3748; /* Dark gray */
+  margin-bottom: 10px;
+}
+
+.card-header p {
+  color: #718096; /* Light gray */
+  font-size: 1rem;
+  margin-bottom: 30px;
+}
+
+/* Input Styling */
+.input-field {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0; /* Light border */
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #4a5568; /* Dark gray */
+  background-color: #f7fafc; /* Light background */
+  transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.input-field:focus {
+  border-color: #4c6ef5; /* Blue focus */
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(76, 110, 245, 0.1); /* Subtle focus ring */
+}
+
+/* Label Styling */
+.label {
+  font-weight: 600;
+  color: #2d3748; /* Dark gray */
+  margin-bottom: 8px;
+  font-size: 1rem;
+  display: block;
+}
+
+/* Button Styling */
+.button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #4c6ef5, #6f42c1); /* Gradient */
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.button:hover {
+  background: linear-gradient(135deg, #3b5bdb, #5e3aa8); /* Darker gradient */
+  transform: scale(1.02);
+}
+
+.button:active {
+  transform: scale(0.98);
+}
+
+/* Error Message */
+.error-message {
+  color: #e53e3e; /* Red */
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* Footer Section */
+.footer {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #718096; /* Light gray */
+  margin-top: 30px;
+}
+
+.footer a {
+  color: #4c6ef5; /* Blue */
+  text-decoration: none;
+  transition: color 0.3s ease-in-out;
+}
+
+.footer a:hover {
+  color: #3b5bdb; /* Darker blue */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .card {
+    max-width: 90%;
+    padding: 20px;
+  }
+
+  .card-header h2 {
+    font-size: 1.75rem;
+  }
+
+  .card-header p {
+    font-size: 0.9rem;
+  }
+
+  .input-field {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  .button {
+    padding: 12px;
+    font-size: 1rem;
+  }
+}
